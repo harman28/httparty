@@ -39,7 +39,7 @@ module HTTParty
         if value.empty?
           normalized_keys << ["#{key}[]", '']
         else
-          normalized_keys = value.to_ary.flat_map { |element| normalize_keys("#{key}[]", element) }
+          normalized_keys = value.to_ary.flat_map.with_index { |element,index| normalize_keys("#{key}[#{index}]", element) }
         end
       elsif value.respond_to?(:to_hash)
         stack << [key, value.to_hash]
@@ -52,7 +52,7 @@ module HTTParty
           if child_value.respond_to?(:to_hash)
             stack << ["#{parent}[#{child_key}]", child_value.to_hash]
           elsif child_value.respond_to?(:to_ary)
-            child_value.to_ary.each { |v| normalized_keys << normalize_keys("#{parent}[#{child_key}][]", v).flatten }
+            child_value.to_ary.each_with_index { |v, index| normalized_keys << normalize_keys("#{parent}[#{child_key}][#{index}]", v).flatten }
           else
             normalized_keys << normalize_keys("#{parent}[#{child_key}]", child_value).flatten
           end
