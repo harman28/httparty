@@ -14,6 +14,30 @@ RSpec.describe HTTParty::HashConversions do
       expect(HTTParty::HashConversions.to_params(hash)).to eq("name=bob&address[street]=111%20ruby%20ave.&address[city]=ruby%20central&address[phones][]=111-111-1111&address[phones][]=222-222-2222")
     end
 
+    it "checks for ambiguity" do
+      obj_with_numeric_keys = {
+        parent: {
+          0 => 'zero',
+          1 => 'one'
+        }
+      }
+
+      arr_with_values = {
+        parent: [
+          'zero',
+          'one'
+        ]
+      }
+
+      convert_obj = HTTParty::HashConversions.to_params(obj_with_numeric_keys)
+      convert_arr = HTTParty::HashConversions.to_params(arr_with_values)
+
+      p convert_obj
+      p convert_arr
+
+      expect(convert_arr).not_to eq(convert_obj)
+    end
+
     context "nested params" do
       it 'creates a params string from a hash' do
         hash = { marketing_event: { marketed_resources: [ {type:"product", id: 57474842640 } ] } }
